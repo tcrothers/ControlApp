@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      {% if title %}
+      <title>{{ title }} - PyControl</title>
+      {% else %}
+      <title>Welcome to PyControl</title>
+      {% endif %}
+    </head>
+    <body>
+        <div>Pycontrol:
+            {% if current_user.is_anonymous %}
+                <a href={{ url_for('login') }}>Login</a>|
+            {% else %}
+                <a href={{ url_for('logout') }}>Logout</a>|
+                <a href={{ url_for('register_user') }}>AddUser</a>|
+                <a href={{ url_for('index') }}>Index</a> |
+                <a href={{ url_for('xps_view') }}>XPS</a>|
+                <a href="{{ url_for('user_home',
+                        reuqested_username=current_user.username)
+                        }}">Home </a>
+            {% endif %}
+         </div>
+        <hr>
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <ul>
+            {% for message in messages %}
+            <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </body>
+</html>

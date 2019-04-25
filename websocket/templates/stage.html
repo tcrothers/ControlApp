@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Websocket example</title>
+  </head>
+
+
+  <body>
+    <table id="GroupTable" style="width: 100%">
+    <tr>
+        <th id="name">Name</th>
+        <th id ="state">Status</th>
+        <th id ="position">Position</th>
+        <th id ="set">Abs Move</th>
+        <th id ="button_col"></th>
+    </tr>
+        {% for stage in stages %}
+    <tr id="{{ stage.name }}_row">
+        <td headers="name">{{ stage.name }}</td>
+        <td headers="state">{{ stage.state }}</td>
+        <td headers="position">{{ stage.position }}</td>
+        <td headers="set"> <input size="6" type="text" id="{{ stage.name }}_input"> </td>
+        <td> <button name="{{ stage.name }}_button">Go</button> </td>
+    </tr>
+        {% endfor %}
+    </table>
+    <script src="{{url_for('static', filename='stage.js')}}"></script>
+
+  </body>
+</html>
