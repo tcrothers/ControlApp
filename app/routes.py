@@ -8,7 +8,7 @@ from app.models import User
 from werkzeug.urls import url_parse
 
 
-@app.route("/")
+@app.route("/", methods=["GET", "POST"])
 @app.route('/login', methods=["GET", "POST"])
 async def login():
     if current_user.is_authenticated:

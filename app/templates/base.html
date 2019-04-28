@@ -1,36 +1,49 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
+{% extends "bootstrap/base.html" %}
+
+{% block styles %}
+{{super()}}
+<link rel="stylesheet"
+      href="{{url_for('.static', filename='mystyle.css')}}">
+{% endblock %}
+
+{% block html_attribs %} lang="en"{% endblock %}
+
+{% block title %}
       {% if title %}
-      <title>{{ title }} - PyControl</title>
+      {{ title }} - PyControl
       {% else %}
-      <title>Welcome to PyControl</title>
+      Welcome to PyControl
       {% endif %}
-    </head>
-    <body>
-        <div>Pycontrol:
-            {% if current_user.is_anonymous %}
-                <a href={{ url_for('login') }}>Login</a>|
-            {% else %}
-                <a href={{ url_for('logout') }}>Logout</a>|
-                <a href={{ url_for('register_user') }}>AddUser</a>|
-                <a href={{ url_for('index') }}>Index</a> |
-                <a href={{ url_for('xps_view') }}>XPS</a>|
-                <a href="{{ url_for('user_home',
-                        reuqested_username=current_user.username)
-                        }}">Home </a>
-            {% endif %}
-         </div>
-        <hr>
+{% endblock %}
+
+{% block navbar %}
+    <nav class="navbar navbar-default">
+    Pycontrol:
+        {% if current_user.is_anonymous %}
+            <a href={{ url_for('login') }}>Login</a>|
+        {% else %}
+            <a href={{ url_for('logout') }}>Logout</a>|
+            <a href={{ url_for('register_user') }}>AddUser</a>|
+            <a href={{ url_for('index') }}>Index</a> |
+            <a href={{ url_for('xps_view') }}>XPS</a>|
+            <a href="{{ url_for('user_home',
+                    reuqested_username=current_user.username)
+                    }}">Home </a>
+        {% endif %}
+    </nav>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
         {% with messages = get_flashed_messages() %}
         {% if messages %}
-        <ul>
             {% for message in messages %}
-            <li>{{ message }}</li>
+            <div class="alert alert-info" role="alert">{{ message }}</div>
             {% endfor %}
-        </ul>
         {% endif %}
         {% endwith %}
-        {% block content %}{% endblock %}
-    </body>
-</html>
+
+        {# application content needs to be provided in the app_content block #}
+        {% block app_content %}{% endblock %}
+    </div>
+{% endblock %}

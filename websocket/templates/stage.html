@@ -1,26 +1,37 @@
 <!doctype html>
 <html>
   <head>
+      <link rel=stylesheet type="text/css" href="{{ url_for("static", filename="mystyle.css") }}">
     <title>Websocket example</title>
   </head>
 
 
   <body>
+  <h1>XPS Manual Control, viewers = <div id="viewer_count"></div></h1>
+  <div class="alert" id="MessageZone"></div>
     <table id="GroupTable" style="width: 100%">
     <tr>
         <th id="name">Name</th>
         <th id ="state">Status</th>
         <th id ="position">Position</th>
-        <th id ="set">Abs Move</th>
-        <th id ="button_col"></th>
+        <th id ="abs">Abs Move</th>
+        <th id ="button_col1"></th>
+        <th id ="button_col2"></th>
+        <th id ="abs">Rel Move</th>
+        <th id ="button_col3"></th>
+
     </tr>
         {% for stage in stages %}
     <tr id="{{ stage.name }}_row">
         <td headers="name">{{ stage.name }}</td>
         <td headers="state">{{ stage.state }}</td>
         <td headers="position">{{ stage.position }}</td>
-        <td headers="set"> <input size="6" type="text" id="{{ stage.name }}_input"> </td>
-        <td> <button name="{{ stage.name }}_button">Go</button> </td>
+        <td headers="abs"> <input size="3" type="text" id="{{ stage.name }}_input"> </td>
+        <td> <button name="{{ stage.name }}_abs_move">Go</button> </td>
+    {# rel move: #}
+        <td> <button name="{{ stage.name }}_rel_min"> < </button> </td>
+        <td headers="rel"> <input size="3" type="text" id="{{ stage.name }}_input"> </td>
+        <td> <button name="{{ stage.name }}_rel_plus"> > </button> </td>
     </tr>
         {% endfor %}
     </table>
