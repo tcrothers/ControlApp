@@ -1,7 +1,7 @@
-from app import app, db
+from app import app, db, stages
 from quart import render_template, redirect, flash, request, url_for
 import trio
-from app.mock_objs import mock_user, mock_stage1, mock_stage2, mock_xps
+from app.mock_objs import mock_xps
 from app.forms import LoginForm, RegistrationForm
 from flask_login import current_user, login_user, logout_user, login_required
 from app.models import User
@@ -50,15 +50,20 @@ async def user_home(reuqested_username):
                 {"author": user, "body": "test post 1"},
                 {"author": user, "body": "test post 2"}
             ]
-    return await render_template('user.html', user=user, posts=posts)
+    return await render_template('user.html', title=user, user=user, posts=posts)
 
 
 @app.route("/xps")
 @login_required
 async def xps_view():
     xps = mock_xps
-    stages = [mock_stage1, mock_stage2]
-    return await render_template("xps_status.html", title="Sign In", xps=xps, stages=stages)
+    return await render_template("xps_status.html", title="XPS", xps=xps, stages=list(stages.values()))
+
+
+@app.route("/scan")
+@login_required
+async def scan_window():
+    return await render_template("scan.html", title="Scan Window", stages=list(stages.values()))
 
 
 @app.route("/register_user", methods=["GET", "POST"])
@@ -74,3 +79,5 @@ async def register_user():
         await flash(f"New User '{new_user.username}' Added Sucessfully")
         return redirect(url_for("index"))
     return await render_template('register.html', title="Register", form=form)
+
+

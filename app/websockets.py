@@ -1,36 +1,34 @@
-from app import app
-import trio
+from app import app, stages
+from quart import websocket
 import json
-from functools import wraps
-
-
-def collect_websocket(func):
-    @wraps(func)
-    async def wrapper(*args, **kwargs):
-        print("wrapping: adding connection")
-        app.xps_watchers.add(websocket._get_current_object())
-        try:
-            return await func(*args, **kwargs)
-        finally:
-            print("wrapper: removing connection")
-            app.xps_watchers.remove(websocket._get_current_object())
-    return wrapper
-
-
-async def broadcast(message: str):
-    active = len(app.xps_watchers)
-    for websock in app.xps_watchers:
-        await websock.send(message)
 
 
 @app.websocket('/ws')
-@collect_websocket
+@app.xps_connections.collect_websocket  # decorator handles opening and closing
 async def ws():
-    while True:
-        msg = await websocket.receive()
-        stage, new_stage_pos = msg.split(":")
-        # async with trio.open_nursery() as nursery:
-        moving = trio.Event()
-        app.nursery.start_soon(stages[stage].move_to, new_stage_pos, moving)
-        app.nursery.start_soon(stages[stage].broadcast_position, moving)
-        # await websocket.send(f"{stages[stage].to_json()}")
+    # on page load function starts then heads into a loop
+    try:
+        while True:
+            msg: str = await websocket.receive()
+            if msg == "pong":
+                print("heartbeat response")
+                continue
+
+            stage, command, command_arg = msg.split(":")
+
+            print(f"stage={stage}", f"cmd={command}", f"arg={command_arg}")
+
+            # display an error if stage is busy
+            if stages[stage].is_busy():
+                await websocket.send(json.dumps({"error": f"{stage} busy"}))
+                continue
+
+            if command == "abs_move":
+                app.nursery.start_soon(stages[stage].move_to, command_arg)
+            elif command == "rel_move":
+                app.nursery.start_soon(stages[stage].move_by, command_arg)
+
+    finally:
+        pass
+
+    # called as client closes

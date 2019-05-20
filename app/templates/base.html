@@ -20,12 +20,13 @@
     <nav class="navbar navbar-default">
     Pycontrol:
         {% if current_user.is_anonymous %}
-            <a href={{ url_for('login') }}>Login</a>|
+            <a href={{ url_for('login') }}> Login </a>
         {% else %}
-            <a href={{ url_for('logout') }}>Logout</a>|
-            <a href={{ url_for('register_user') }}>AddUser</a>|
-            <a href={{ url_for('index') }}>Index</a> |
-            <a href={{ url_for('xps_view') }}>XPS</a>|
+            <a href={{ url_for('logout') }}> Logout </a>|
+            <a href={{ url_for('register_user') }}> AddUser </a>|
+            <a href={{ url_for('index') }}> Index </a> |
+            <a href={{ url_for('scan_window') }}> Scan </a>|
+            <a href={{ url_for('xps_view') }}> XPS </a>|
             <a href="{{ url_for('user_home',
                     reuqested_username=current_user.username)
                     }}">Home </a>

@@ -13,7 +13,13 @@ bootstrap = Bootstrap(app)
 login = LoginManager(app)
 login.login_view = 'login'
 
-from app import routes, models
+# hardware support
+from app import resources, instruments
+
+stages = instruments.stages
+
+# routing
+from app import routes, models, websockets
 
 
 # db.create_all()
