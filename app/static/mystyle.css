@@ -35,3 +35,10 @@ td, th {
 h1 {
     color: crimson;
 }
+
+#container {
+border: 12px solid #B22222;
+border-radius: 10px;
+margin-top: 15px;
+margin-bottom: 15px;
+}

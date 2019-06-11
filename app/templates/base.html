@@ -2,8 +2,7 @@
 
 {% block styles %}
 {{super()}}
-<link rel="stylesheet"
-      href="{{url_for('.static', filename='mystyle.css')}}">
+<link rel="stylesheet" href="{{url_for('.static', filename='mystyle.css')}}">
 {% endblock %}
 
 {% block html_attribs %} lang="en"{% endblock %}
@@ -28,7 +27,7 @@
             <a href={{ url_for('scan_window') }}> Scan </a>|
             <a href={{ url_for('xps_view') }}> XPS </a>|
             <a href="{{ url_for('user_home',
-                    reuqested_username=current_user.username)
+                    requested_username=current_user.username)
                     }}">Home </a>
         {% endif %}
     </nav>

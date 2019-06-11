@@ -18,6 +18,9 @@ from app import resources, instruments
 
 stages = instruments.stages
 
+from app import scans
+scan = scans.Scan()
+
 # routing
 from app import routes, models, websockets
 
