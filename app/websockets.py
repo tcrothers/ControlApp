@@ -1,10 +1,10 @@
-from app import app, stages
+from app import app, xps1
 from quart import websocket
 import json
 
 
 @app.websocket('/ws')
-@app.xps_connections.collect_websocket  # decorator handles opening and closing
+@xps1.con_man.collect_websocket  # decorator handles opening and closing
 async def ws():
     # on page load function starts then heads into a loop
     try:
@@ -18,15 +18,19 @@ async def ws():
 
             print(f"stage={stage}", f"cmd={command}", f"arg={command_arg}")
 
+            inst_to_move = xps1.instruments[stage]
+            param_to_set = 'Position'
+
             # display an error if stage is busy
-            if stages[stage].is_busy():
+            if inst_to_move.is_busy():
                 await websocket.send(json.dumps({"error": f"{stage} busy"}))
                 continue
 
+
             if command == "abs_move":
-                app.nursery.start_soon(stages[stage].move_to, command_arg)
+                app.nursery.start_soon(inst_to_move.set_param, param_to_set, command_arg)
             elif command == "rel_move":
-                app.nursery.start_soon(stages[stage].move_by, command_arg)
+                app.nursery.start_soon(inst_to_move.relative_adjust_parameter, param_to_set, command_arg)
 
     finally:
         pass

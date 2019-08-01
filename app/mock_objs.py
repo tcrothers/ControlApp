@@ -1,22 +1,25 @@
-from app.instruments import Stage
+from app.intruments.instruments import XpsGroup, BaseInstrumentGroup
+from app.resources import ConnectionManager
 
 mock_user = {"username": "Tim"}
 
-mock_stage1 = {"name": "Group1",
-               "position": 45,
-               "state": 12}
+xps_connections = ConnectionManager()
 
-mock_stage2 = {"name": "Group2",
-               "position": 100,
-               "state": 12}
+fake_xps = XpsGroup("Laura's XPS")
 
-mock_xps = {"host": "172.16.0.0"}
+fake_xps.add_instrument("GROUP1")
+fake_xps.add_instrument("GROUP2")
+fake_xps.add_instrument("GROUP3")
+fake_xps.add_instrument("GROUP4")
 
+# todo: Should really prepend the group name on this to make unique
+all_insts = BaseInstrumentGroup('all instruments')
+all_insts.instruments.update(fake_xps.instruments)
 
-stage1 = Stage("GROUP1")
-stage2 = Stage("GROUP2")
-stage3 = Stage("GROUP3")
-stage4 = Stage("GROUP4")
+# stage1 = NewStage("GROUP1")
+# stage2 = NewStage("GROUP2")
+# stage3 = NewStage("GROUP3")
+# stage4 = NewStage("GROUP4")
 
-mock_stages = {"GROUP1":stage1, "GROUP2":stage2,
-               "GROUP3":stage3, "GROUP4":stage4}
+# stages = {"GROUP1": stage1, "GROUP2": stage2,
+#           "GROUP3": stage3, "GROUP4": stage4}

@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block app_content %}
+
+<body>
+<div class="container">
+    <div class="row">
+            <h2>Add Step:</h2>
+        <div class="col-xs-4">
+            {{ wtf.quick_form(add_form) }}
+        </div>
+
+        <div class="col-xs-4">
+        <h2>Steps</h2>
+        {% for step in scan.steps %}
+            {{ step.inst.name }}::{{  step.parameter }}::{{ step.values }}
+            <hr>
+        {%  endfor %}
+        </div>
+
+        <div class="col-xs-4">
+                <h2>Start Scan</h2>
+          <button id="start_scan">Start Scan</button>
+            <p id="scan_info" class="text-info"></p>
+        </div>
+    </div>
+</div>
+<script src="../static/jquery.min.js"></script>
+
+<script>
+    // todo : add verification @login_required to ajax endpoint
+
+    $(document).ready(function () {
+        console.log("in on ready func");
+
+        let inst_field = $("#instrument");
+        let param_field = $("#param");
+        let submit_field = $("#submit");
+        let val_field = $("#scan_values");
+        let start_btn = $("#start_scan");
+
+        submit_field.prop("disabled", true);
+
+        let add_new_opts = function(selectField, newOptions) {
+            selectField.empty(); // remove old options
+            $.each(newOptions, function(key,value) {
+              selectField.append($("<option></option>")
+                 .attr("value", value).text(key));
+            });
+
+        };
+
+        let grey_out_submit = function() {
+            // prevent form submission if either the param or inst are empty:
+                console.log("checking fields");
+                let p_empty = (param_field.prop("value") === "");
+                let inst_empty = (inst_field.prop("value") === "");
+                let vals_empty = (val_field.prop("value") === "");
+
+                let set_val = (p_empty || inst_empty || vals_empty);
+                submit_field.prop("disabled", set_val);
+        };
+
+        inst_field.change(function () {
+
+            let data_to_send = {"inst":this.value};
+            $.ajax({
+                type: "POST",
+                url: "/_parse_data",
+                dataType : "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(data_to_send),
+                success: function(data) {
+                  // POST was successful - do something with the response
+                  if (data.hasOwnProperty("msg_success")){
+                      add_new_opts(param_field, data.new_params);
+                      grey_out_submit();
+                  }
+                },
+                error: function(data) {
+                  // Server error, e.g. 404, 500, error
+                  alert(data.responseText);
+                }
+
+            });
+        });
+
+        param_field.change(function() {
+            grey_out_submit();
+        });
+
+        val_field.mouseleave(function () {
+          if (val_field.prop("value") === val_field.prop("defaultValue")) {
+                val_field.prop('value', '');
+          }
+          grey_out_submit();
+        });
+
+        start_btn.click(function () {
+             let data_to_send = {"action": start_btn.text()};
+
+             start_btn.prop("disabled", true);
+
+             console.log("sending", data_to_send);
+            $.ajax({
+                type: "POST",
+                url: "/_start_stop_scan",
+                dataType : "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(data_to_send),
+                success: function(data) {
+                  // POST was successful - do something with the response
+                  console.log("trying to update scan info to ", data);
+                    if (data.hasOwnProperty("button_text")){
+                    console.log("trying to update scan info to ", data.button_text);
+                      start_btn.text(data.button_text);
+                  }
+                    if (data.hasOwnProperty("msg")){
+                      console.log("trying to update scan info to ", data.msg);
+                      $("#scan_info").text(data.msg);
+                  }
+                 start_btn.prop("disabled", false);
+                },
+                error: function(data) {
+                  // Server error, e.g. 404, 500, error
+                  alert(data.responseText);
+                  start_btn.prop("disabled", false);
+                }
+            });
+        });
+    });
+</script>
+
+{% endblock %}

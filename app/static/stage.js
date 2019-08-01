@@ -25,7 +25,7 @@ ws.onmessage = function (event) {
     }
 
 
-    let stage_name = received_msg.name;
+    let stage_name = received_msg.parent;
 
     let row_to_update = document.getElementById(stage_name + "_row");
     let update_buttons = function (val) {
@@ -36,7 +36,7 @@ ws.onmessage = function (event) {
     };
 
     for (let field in received_msg) {
-        if (field === "name") {
+        if (field === "parent") {
             continue
         }
         if (received_msg.hasOwnProperty(field)) {
@@ -47,8 +47,10 @@ ws.onmessage = function (event) {
                     update_buttons(false);
                 }
             }
-            let cell_to_update = row_to_update.querySelector('[Headers=' + field + ']');
-            cell_to_update.textContent = received_msg[field];
+            if (field === "position") {
+                let cell_to_update = row_to_update.querySelector('[Headers=' + field + ']');
+                cell_to_update.textContent = received_msg[field];
+            }
         }
     }
 };

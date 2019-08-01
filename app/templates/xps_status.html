@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block app_content %}
-<h1>XPS Manual Control (IP: {{ xps.host }})</h1>
+<h1>XPS Manual Control (IP: {{ hostname }})</h1>
 <div id="viewer_count"></div>
   <div class="alert" id="MessageZone"></div>
     <table id="GroupTable" style="width: 100%">
@@ -16,19 +16,22 @@
         <th id ="button_col3"></th>
 
     </tr>
-        {% for stage in stages %}
-    <tr id="{{ stage.name }}_row">
-        <td headers="name">{{ stage.name }}</td>
-        <td headers="state">{{ stage.state }}</td>
-        <td headers="position">{{ stage.position }}</td>
-        <td headers="abs"> <input size="3" type="text" id="{{ stage.name }}_input"> </td>
-        <td> <button name="{{ stage.name }}_abs_move">Go</button> </td>
+        {% for stage in stages.values() %}
+        {% for param in stage.values() %}
+    <tr id="{{ param['parent'] }}_row">
+        <td headers="name">{{ param['parent'] }}</td>
+        <td headers="state">{{ param['state'] }}</td>
+        <td headers="position">{{ param['Position'] }}</td>
+        <td headers="abs"> <input size="3" type="text" id="{{ param['parent'] }}_input"> </td>
+        <td> <button name="{{ param['parent'] }}_abs_move">Go</button> </td>
     {# rel move: #}
-        <td> <button name="{{ stage.name }}_rel_min"> < </button> </td>
-        <td headers="rel"> <input size="3" type="text" id="{{ stage.name }}_input"> </td>
-        <td> <button name="{{ stage.name }}_rel_plus"> > </button> </td>
+        <td> <button name="{{ param['parent'] }}_rel_min"> < </button> </td>
+        <td headers="rel"> <input size="3" type="text" id="{{ param['parent'] }}_input"> </td>
+        <td> <button name="{{ param['parent'] }}_rel_plus"> > </button> </td>
     </tr>
         {% endfor %}
+        {% endfor %}
+
     </table>
     <script src="{{url_for('static', filename='stage.js')}}"></script>
 

@@ -14,12 +14,13 @@ login = LoginManager(app)
 login.login_view = 'login'
 
 # hardware support
-from app import resources, instruments
+from app import mock_objs
 
-stages = instruments.stages
+xps1 = mock_objs.fake_xps
+all_insts = mock_objs.all_insts
 
 from app import scans
-scan = scans.Scan()
+scan = scans.Scan(all_insts)
 
 # routing
 from app import routes, models, websockets
