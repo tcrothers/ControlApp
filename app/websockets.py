@@ -20,7 +20,7 @@ async def ws():
 
             inst_to_move = xps1.instruments[stage]
             param_to_set = 'Position'
-
+            # todo error checking of input: must be a number!
             # display an error if stage is busy
             if inst_to_move.is_busy():
                 await websocket.send(json.dumps({"error": f"{stage} busy"}))

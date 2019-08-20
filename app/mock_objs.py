@@ -1,11 +1,10 @@
-from app.intruments.instruments import XpsGroup, BaseInstrumentGroup
-from app.resources import ConnectionManager
+from instruments.generic import BaseInstrumentGroup
+from instruments.newport_xps import XpsGroup
+from resources.web_connections import ConnectionManager
 
 mock_user = {"username": "Tim"}
 
-xps_connections = ConnectionManager()
-
-fake_xps = XpsGroup("Laura's XPS")
+fake_xps = XpsGroup("Laura's XPS", ConnectionManager(), "172.0.0.0", 5001)
 
 fake_xps.add_instrument("GROUP1")
 fake_xps.add_instrument("GROUP2")

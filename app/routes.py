@@ -1,7 +1,7 @@
 from app import app, db, xps1, all_insts, scan
 from quart import render_template, redirect, flash, request, url_for
 import trio
-from app.forms import LoginForm, RegistrationForm, AddStepForm, RemoveStepForm
+from app.forms import LoginForm, RegistrationForm, AddStepForm
 from flask_login import current_user, login_user, logout_user, login_required
 from app.models import User
 from werkzeug.urls import url_parse
@@ -144,27 +144,17 @@ async def start_stop_scan():
     return json.dumps(reply)
 
 
-@app.route("/scan/rm", methods=["POST"])
+@app.route("/_scan_rm", methods=["POST"])
 @login_required
 async def scan_window_rm():
-    rm_step_form = RemoveStepForm(await request.form)
-    add_step_form = AddStepForm()
-    add_step_form.get_instruments(all_insts)
-    rm_step_form.get_steps(len(scan.steps))
+    data_dict = json.loads(await request.data)
+    target_step = int(data_dict['step_number'])
+    print(f"target step {target_step}")
 
-    print("validation", rm_step_form.validate_on_submit())
-    print("submitted", rm_step_form.is_submitted())
-    print("data", rm_step_form.step_number.data)
-
-    if rm_step_form.validate_on_submit():
-        print("rm validated")
-        scan.rm_step(rm_step_form)
-        rm_step_form.get_steps(len(scan.steps))
-    else:
-        await flash("validation failed")
-
-    return await render_template("scan.html", title="Scan Window",
-                                 add_form=add_step_form, rm_form=rm_step_form, scan=scan)
+    target = scan.remove_step(target_step)
+    print(f"step {target.step_number} removed")
+    reply = {"msg_success": True, "step_number": target.step_number}
+    return json.dumps(reply)
 
 
 @app.route("/register_user", methods=["GET", "POST"])

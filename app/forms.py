@@ -15,7 +15,7 @@ class LoginForm(FlaskForm):
 
 class AddStepForm(FlaskForm):
     # needs to be able to validate that the min and max values are good
-    instrument = SelectField("Instrument Name : ", validators=[DataRequired()])
+    instrument = SelectField("Instrument Name : ", choices=[("", ""), ], validators=[DataRequired()])
     param = SelectField("Parameter to Adjust : ", choices=[("", ""), ])
     scan_values = StringField("values", validators=[DataRequired()], default='start,stop,numPts;')
     log_spacing = RadioField("Point Spacing", validators=[DataRequired()],
@@ -26,8 +26,8 @@ class AddStepForm(FlaskForm):
 
     def get_instruments(self, all_insts: dict) -> None:
         self.inst_dict = all_insts
-        self.instrument.choices = [[k, k] for k in all_insts.keys()]
-
+        for k in all_insts.keys():
+            self.instrument.choices.append([k, k])
         #     for param_name, param_obj in inst_obj.parameters.items():
         #         self.instrument.choices.append([param_name, param_name])
         #         self.param_max[inst_name] = inst_obj.hi_lim
@@ -79,14 +79,6 @@ class AddStepForm(FlaskForm):
             raise ValidationError(f"values '{data_pts.min()}' less than inst min ({param_min})")
         if data_pts.max() > param_max:
             raise ValidationError(f"values '{data_pts.max()}' greater than inst max ({param_max})")
-
-
-class RemoveStepForm(FlaskForm):
-    step_number = SelectField("Remove", coerce=str, validators=[DataRequired()])
-    submit = SubmitField('Remove Step')
-
-    def get_steps(self, num_steps: int):
-        self.step_number.choices = [(str(i), str(i+1)) for i in range(num_steps)]
 
 
 class RegistrationForm(FlaskForm):

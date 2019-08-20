@@ -1,7 +1,7 @@
 from quart import render_template, websocket
 from quart_trio import QuartTrio
 import json
-from app.resources import ConnectionManager
+from resources.web_connections import ConnectionManager
 from app.mock_objs import mock_stages
 
 

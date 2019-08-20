@@ -4,6 +4,7 @@
 {% block app_content %}
 
 <body>
+
 <div class="container">
     <div class="row">
             <h2>Add Step:</h2>
@@ -13,19 +14,24 @@
 
         <div class="col-xs-4">
         <h2>Steps</h2>
+        <ul class="list-group">
         {% for step in scan.steps %}
-            {{ step.inst.name }}::{{  step.parameter }}::{{ step.values }}
-            <hr>
+            <li class="list-group-item" id="stepBox_{{ step.step_number }}">
+            {{ step.inst.name }}::{{  step.parameter }}::{{ step.render_values() }}::
+                <button type="button" class="btn-warning" value="{{ step.step_number }}" id="stepButton_{{ step.step_number }}">rm step</button>
+            </li>
         {%  endfor %}
+        </ul>
         </div>
 
         <div class="col-xs-4">
                 <h2>Start Scan</h2>
-          <button id="start_scan">Start Scan</button>
+          <button type="button" class="btn-primary" id="start_scan">Start Scan</button>
             <p id="scan_info" class="text-info"></p>
         </div>
     </div>
 </div>
+
 <script src="../static/jquery.min.js"></script>
 
 <script>
@@ -49,6 +55,16 @@
                  .attr("value", value).text(key));
             });
 
+        };
+
+        let rm_field = function (target) {
+            $(".list-group-item").eq(target).remove();
+
+            $(".btn-warning").each(function (index) {
+                console.log(this.value);
+                this.value = index;
+                console.log(this.value);
+            });
         };
 
         let grey_out_submit = function() {
@@ -95,6 +111,35 @@
                 val_field.prop('value', '');
           }
           grey_out_submit();
+        });
+
+        // remove step
+        $(".btn-warning").click(function () {
+            console.log("id=", $(this).attr("id"));
+            console.log("value=", $(this).attr("value"));
+
+            // send the rm step request to app
+            let data_to_send;
+            data_to_send = {"step_number": this.value};
+            $.ajax({
+                type: "POST",
+                url: "/_scan_rm",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(data_to_send),
+                success: function (data) {
+                    // POST was successful - do something with the response
+                    if (data.hasOwnProperty("msg_success")) {
+                        rm_field(data.step_number);
+                    }
+                },
+                error: function (data) {
+                    // Server error, e.g. 404, 500, error
+                    alert(data.responseText);
+                }
+
+
+            });
         });
 
         start_btn.click(function () {

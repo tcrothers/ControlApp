@@ -5,7 +5,7 @@ import trio
 
 test_step_1 = ("GROUP1", "Position", np.array([1, 2, 3, 4, 5]))
 test_step_2 = ("GROUP2", "Position", np.array([10, 20]))
-
+test_meas_3 = ("GROUP3", "Position")
 
 def new_scan():
     return Scan(all_insts)
@@ -34,7 +34,7 @@ async def test_measure():
     val = await all_insts.instruments['GROUP1'].get_param('Position')
     print(val)
     print("using report method:")
-    val = await my_scan.steps[0].report()
+    val = await my_scan.steps[0].measure()
     print(val)
 
 def test_scanning():
@@ -42,7 +42,8 @@ def test_scanning():
     my_scan = new_scan()
     my_scan.add_step(*test_step_1)
     my_scan.add_step(*test_step_2)
-    trio.run(my_scan.run)
+    my_scan.add_measurement(*test_meas_3)
+    trio.run(my_scan.run, "test_scanning")
     print("scan finished successfully")
 
 if __name__ == "__main__":

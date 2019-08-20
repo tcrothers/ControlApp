@@ -25,5 +25,8 @@ scan = scans.Scan(all_insts)
 # routing
 from app import routes, models, websockets
 
+# todo: print vals to file
+# todo: connect to instruments
+# todo: display results
 
 # db.create_all()

@@ -1,7 +1,7 @@
+from __future__ import annotations
 import trio
-from app.resources import ConnectionManager
-from app.intruments.errors import MovementException
-from app.intruments.parameters import Parameter
+from resources.base import ConGroupBase
+from instruments.errors import MovementException
 from quart import websocket
 import json
 
@@ -10,11 +10,56 @@ import json
 # HMBoard.CurtainDown  = ungrouped
 
 
+class Parameter:
+    # sets and reads value, handles logic about moving
+
+    def __init__(self, name: str, parent: Instrument,
+                 min_val: float, max_val: float):
+        self.name = name
+        self._parent = parent
+        self.parent = parent.name
+        self.min_val = min_val
+        self.max_val = max_val
+        self._val = 0
+
+    async def set_to(self, new_value):
+        await self._set(new_value)
+
+    async def read(self):
+        await trio.sleep(0)
+        return self._val
+
+    def full_name(self):
+        return ".".join([self.parent, self.name])
+
+    async def to_json(self, decimals=3):
+        current_value = await self.read()
+        base_info = {
+            "name": self.name, 'parent': self.parent, "position": f"{current_value:.{decimals}f}"}
+        return json.dumps(base_info)
+
+    async def _set(self, new_value):
+        new_value = int(new_value)
+        if new_value > self._val:
+            while new_value > self._val:
+                self._val += 0.5
+                await trio.sleep(0.25)
+        else:
+            while new_value < self._val:
+                self._val -= 0.5
+                await trio.sleep(0.25)
+
+    def check_value_between_limits(self, new_value: float):
+        if new_value < self.min_val or new_value > self.max_val:
+            raise MovementException(
+                f"{new_value} outside range of {self.full_name()} ({self.min_val} -> {self.max_val})")
+
+
 class Instrument:
     # container of parameters, marks them busy,
     # passes values to Parameters and broadcasts updates of params
 
-    def __init__(self, name: str, con_man: ConnectionManager, params_in: list = None):
+    def __init__(self, name: str, con_man: ConGroupBase, params_in: list = None):
         self.keep_broadcasting_updates = con_man.broadcast_until_stopped
         self.broadcast = con_man.broadcast
         self.parameters = {}
@@ -25,7 +70,7 @@ class Instrument:
 
     def add_parameters(self, list_of_dicts):
         for p in list_of_dicts:
-            self.parameters[p['name']] = Parameter(p['name'], self.name, p['min_val'], p['max_val'])
+            self.parameters[p['name']] = Parameter(p['name'], self, p['min_val'], p['max_val'])
 
     async def relative_adjust_parameter(self, param_name: str, displacement):
         try:
@@ -87,10 +132,6 @@ class Instrument:
             raise MovementException(f'unable to convert "{input_str}" to float')
 
 
-class NewStage(Instrument):
-    pass
-
-
 class BaseInstrumentGroup:
     # the base group used to keep track of all instruments,
     # while not having any network connection
@@ -126,28 +167,13 @@ class InstrumentGroup(BaseInstrumentGroup):
     # holds connection info and inst dict
     # socks: set  # actual sockets
 
-    def __init__(self, name: str, host="172.16.0.0"):
+    def __init__(self, name: str, con_man: ConGroupBase, host: str, port: int):
         super().__init__(name)
         self.host = host
-        self.con_man = ConnectionManager()  # manages websockets
+        self.port = port
+        self.con_man = con_man  # manages websockets
         self.connect_to_hardware()
 
 
     def connect_to_hardware(self):
         print(f"{self.name} pretending to connect to hardware...")
-
-
-
-class XpsGroup(InstrumentGroup):
-    # container of a group of instruments
-    # holds connection info and inst dict
-
-    # todo get this to connect to the XPS on initialisation
-
-    def add_instrument(self, name: str):
-        hard_coded_parameters = [{"name": "Position", "min_val": 0, "max_val": 100}, ]
-
-        self.instruments[name] = NewStage(name, self.con_man, hard_coded_parameters)
-        print(f"{self.name} has insts {[p.name for p in self.instruments.values()]}")
-        for v in self.instruments.values():
-            print(f"{v.name} has params {[p.full_name() for p in v.parameters.values()]}")

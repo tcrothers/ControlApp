@@ -1,16 +1,18 @@
+from resources.base import ConGroupBase
+from app import app
 from functools import wraps
 import trio
-from app import app
 from quart import websocket
 import json
 
 
-class ConnectionManager:
+class ConnectionManager(ConGroupBase):
     """ this class handles all websocket connections and    f = await request.form
         communications for a group of instruments
     """
-    active_clients = set()
-    sock = None
+    def __init__(self):
+        self.active_clients = set()
+        self.sock = None
 
     def anyone_listening(self):
         return bool(self.active_clients)
